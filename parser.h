@@ -63,11 +63,11 @@ string Expr(ifstream&, LexTok&); //
 string Term(ifstream&, LexTok&); //
 string Factor(ifstream&, LexTok&); //
 
-//function to optimize assmeblyCommands prototype
+								   //function to optimize assmeblyCommands prototype
 vector<string> Optimization(vector<string>);
 
 //takes old assemblyCommands and processes them to optimize moves...
-vector<string> Optimization(vector<string> code){
+vector<string> Optimization(vector<string> code) {
 	//processing code to vector vector of strings
 	string currentString, tmpStr;
 
@@ -76,11 +76,11 @@ vector<string> Optimization(vector<string> code){
 
 	vector<int> blockPos;
 
-	for (vector<string>::iterator it = code.begin(); it != code.end(); it++){
+	for (vector<string>::iterator it = code.begin(); it != code.end(); it++) {
 
 		ss.str(*it);
 
-		while (ss >> tmpStr){
+		while (ss >> tmpStr) {
 			currentLine.push_back(tmpStr);
 		}
 		ss.clear();
@@ -89,14 +89,22 @@ vector<string> Optimization(vector<string> code){
 		currentLine.clear();
 	}
 
+	//output for the optCommands
+	/*for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
+		for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
+			cout << *inner << " ";
+		}
+		cout << endl;
+	}*/
+
 	//finding the basic blocks of the code by starting at the end and moving to the top
 	//starts from the end of the commands and processes it
 	int highLine = optCommands.size() - 1;
 	vector<int>::iterator m = blockPos.begin();
 	blockPos.insert(m, highLine);
-	highLine--;
+	//highLine--;
 
-	for (vector<vector<string>>::iterator blocking = optCommands.end()-1; blocking != optCommands.begin(); blocking--){
+	for (vector<vector<string>>::iterator blocking = --optCommands.end() ; blocking != optCommands.begin(); blocking--) {
 		//insert from label line == branch target
 
 		//cout << (*blocking)[0] << endl;
@@ -104,34 +112,38 @@ vector<string> Optimization(vector<string> code){
 		//cout << ((*blocking)[0]).back() << endl;
 
 		//once it reaches the top of the file/before the declarations 
-		if ((*blocking)[0].compare(".text") == 0){
+		if ((*blocking)[0].compare(".text") == 0) {
 			break; //break out of the loop
 		}
 
-		else if ( ((*blocking)[0]).back() == ':' ){ //corrected?
+		else if (((*blocking)[0]).back() == ':') { //corrected?
 			m = blockPos.begin();
 			blockPos.insert(m, highLine);
 		}
 		//insert after a bracnh
-		else if (blocking[0][0].compare("bne") == 0 || blocking[0][0].compare("beq") == 0 || blocking[0][0].compare("bge") == 0 || blocking[0][0].compare("ble") == 0 || blocking[0][0].compare("bgt") == 0 || blocking[0][0].compare("blt") == 0){
+		else if (blocking[0][0].compare("bne") == 0 || blocking[0][0].compare("beq") == 0 || blocking[0][0].compare("bge") == 0 || blocking[0][0].compare("ble") == 0 || blocking[0][0].compare("bgt") == 0 || blocking[0][0].compare("blt") == 0) {
 			m = blockPos.begin();
+			int t = highLine + 1;
 
-			blockPos.insert(m, highLine - 1);
+			blockPos.insert(m, t);
 		}
 
 		highLine--;
 	}
+	//adds the start of the program
+	m = blockPos.begin();
+	blockPos.insert(m, 0);
 
-	for (vector<int>::iterator in = blockPos.begin(); in != blockPos.end(); in++){
-		cout << *in << "\t";
-	}
+	//for (vector<int>::iterator in = blockPos.begin(); in != blockPos.end(); in++) {
+	//	cout << *in << "\t";
+	//}
+	//cout << endl;
 
-	/*for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++){
-		for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++){
-			cout << *inner << " ";
-		}
-		cout << endl;
-	}*/
+
+	//starting to process each block
+	
+
+	
 
 	//temp placeholder
 	return assemblyCommands;
@@ -212,24 +224,20 @@ void Program(ifstream& file, LexTok& token) {
 	//output commands at end of programs
 	/*bool txt = false;
 	for (vector<string>::iterator it = assemblyCommands.begin(); it != assemblyCommands.end(); it++) {
-		if (it->compare(".text") == 0) {
-			txt = true;
-		}
-
-		if (txt == false) {
-			cout << *it << endl;
-		}
-		else {
-			if (it->back() != ':' && it->compare(".text") != 0) {
-				cout << "\t" << *it << endl;
-
-			}
-			else {
-				cout << *it << endl;
-			}
-
-		}
-
+	if (it->compare(".text") == 0) {
+	txt = true;
+	}
+	if (txt == false) {
+	cout << *it << endl;
+	}
+	else {
+	if (it->back() != ':' && it->compare(".text") != 0) {
+	cout << "\t" << *it << endl;
+	}
+	else {
+	cout << *it << endl;
+	}
+	}
 	}*/
 
 }
@@ -384,7 +392,7 @@ vector<string> VarList(ifstream& file, LexTok& token) {
 		}
 	}//loop again if there is a comma following the identifier
 
-	//return the vector
+	 //return the vector
 	return ident;
 }
 
@@ -500,7 +508,7 @@ void Assign(ifstream& file, LexTok& token) {
 
 	expect(";", token, file);
 
-	for (int i = 0; i < 10; i++){
+	for (int i = 0; i < 10; i++) {
 		//boolean to check if register used in conditional is part of the declared list
 		bool declared = false;
 		//iterates throuhg the list of declared variables to see if it keeps 
@@ -510,8 +518,8 @@ void Assign(ifstream& file, LexTok& token) {
 				break;
 			}
 		} //if not in the declared list, clears the register instead
-		if (declared == false){
-			
+		if (declared == false) {
+
 			tRegister[i] = "";
 		}
 
@@ -561,17 +569,17 @@ void Read(ifstream& file, LexTok& token) {
 		//finds the register number that needs to be assigned to move the value
 		bool reg = false;
 		string regist = "$t";
-		for (int i = 0; i < 10; i++){
-			if (tRegister[i].compare(*it) == 0){
+		for (int i = 0; i < 10; i++) {
+			if (tRegister[i].compare(*it) == 0) {
 				reg = true;
 				regist += to_string(i);
 				break;
 			}
 		}
-		if (reg == true){
+		if (reg == true) {
 			assemblyCommands.push_back("move " + regist + ", $v0");
 		}
-		else{
+		else {
 			cout << "error" << endl;
 		}
 	}
@@ -651,7 +659,7 @@ void If(ifstream& file, LexTok& token) {
 	//ifOrder.push_back("");
 
 	expect("begin", token, file);
-	 
+
 	//cals StmtList function
 	StmtList(file, token);
 
@@ -799,21 +807,21 @@ string Cond(ifstream& file, LexTok& token) {
 	cond = relo + " " + r1 + ", " + r2 + ", ";
 
 	//clears the registers used in the conditional to free up for the following function
-	
+
 	//boolean to check if register used in conditional is part of the declared list
 	bool declared = false;
 	//iterates throuhg the list of declared variables to see if it keeps 
 	for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
-		if ((*it).compare(tRegister[r1[2]-'0']) == 0) {
+		if ((*it).compare(tRegister[r1[2] - '0']) == 0) {
 			declared = true; //if found bool is true and breaks
 			break;
 		}
 	} //if not in the declared list, clears the register instead
-	if (declared == false){
+	if (declared == false) {
 		int mo = r1[2] - '0';
 		tRegister[mo] = "";
 	}
-	
+
 	declared = false;
 
 	for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
@@ -822,7 +830,7 @@ string Cond(ifstream& file, LexTok& token) {
 			break;
 		}
 	} //if not in the declared list, clears the register instead
-	if (declared == false){
+	if (declared == false) {
 		int mo = r2[2] - '0';
 		tRegister[mo] = "";
 	}
@@ -992,7 +1000,6 @@ string Term(ifstream& file, LexTok& token) {
 			assemblyCommands.push_back("mflo " + r3);
 			//clear unused register after use
 			/*int mo = r2[2] - '0';
-
 			tRegister[mo] = "";*/
 
 			//returns the register the value was stored
@@ -1022,7 +1029,7 @@ string Term(ifstream& file, LexTok& token) {
 			assemblyCommands.push_back("div " + r1 + ", " + r2);
 
 			//check if either is a variable register use to move value to the temp one
-			
+
 			//boolean to check if register used in conditional is part of the declared list
 			bool check = false;
 			//iterates throuhg the list of declared variables to see if it keeps 
@@ -1032,12 +1039,12 @@ string Term(ifstream& file, LexTok& token) {
 				}
 			} //if not in the declared list, returns mflo as r1 or r2(need to implement) /////TEST TEST
 
-			if (check == false){
+			if (check == false) {
 				assemblyCommands.push_back("mflo " + r1);
 				//testing
 				return r1;
 			}
-			else{
+			else {
 				assemblyCommands.push_back("mflo " + r3);
 
 			}
@@ -1097,7 +1104,7 @@ string Factor(ifstream& file, LexTok& token) {
 				tRegister[i] = in;
 				break;
 			}
-			else if (tRegister[i].compare(in) == 0){
+			else if (tRegister[i].compare(in) == 0) {
 				reg = reg + to_string(i);
 				//tRegister[i] = in;
 				break;
