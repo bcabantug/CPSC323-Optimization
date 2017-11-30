@@ -15,6 +15,7 @@ Tested using both IDE and command line
 #include "lexer.h"
 #include <string>
 #include <vector>
+#include <sstream>
 
 
 //vector to hold the commands after
@@ -27,6 +28,10 @@ vector<string> list;
 //vector <string> ifOrder;
 //vector/stack that holds the locations of the elsifs/else for the branch conds
 vector<int> location;
+
+
+//vector of vector<string> that holds the commands for optimization
+vector<vector<string>> optCommands;
 
 //while counters
 int whileCount = 0;
@@ -58,6 +63,80 @@ string Expr(ifstream&, LexTok&); //
 string Term(ifstream&, LexTok&); //
 string Factor(ifstream&, LexTok&); //
 
+//function to optimize assmeblyCommands prototype
+vector<string> Optimization(vector<string>);
+
+//takes old assemblyCommands and processes them to optimize moves...
+vector<string> Optimization(vector<string> code){
+	//processing code to vector vector of strings
+	string currentString, tmpStr;
+
+	stringstream ss;
+	vector<string> currentLine;
+
+	vector<int> blockPos;
+
+	for (vector<string>::iterator it = code.begin(); it != code.end(); it++){
+
+		ss.str(*it);
+
+		while (ss >> tmpStr){
+			currentLine.push_back(tmpStr);
+		}
+		ss.clear();
+
+		optCommands.push_back(currentLine);
+		currentLine.clear();
+	}
+
+	//finding the basic blocks of the code by starting at the end and moving to the top
+	//starts from the end of the commands and processes it
+	int highLine = optCommands.size() - 1;
+	vector<int>::iterator m = blockPos.begin();
+	blockPos.insert(m, highLine);
+	highLine--;
+
+	for (vector<vector<string>>::iterator blocking = optCommands.end()-1; blocking != optCommands.begin(); blocking--){
+		//insert from label line == branch target
+
+		//cout << (*blocking)[0] << endl;
+
+		//cout << ((*blocking)[0]).back() << endl;
+
+		//once it reaches the top of the file/before the declarations 
+		if ((*blocking)[0].compare(".text") == 0){
+			break; //break out of the loop
+		}
+
+		else if ( ((*blocking)[0]).back() == ':' ){ //corrected?
+			m = blockPos.begin();
+			blockPos.insert(m, highLine);
+		}
+		//insert after a bracnh
+		else if (blocking[0][0].compare("bne") == 0 || blocking[0][0].compare("beq") == 0 || blocking[0][0].compare("bge") == 0 || blocking[0][0].compare("ble") == 0 || blocking[0][0].compare("bgt") == 0 || blocking[0][0].compare("blt") == 0){
+			m = blockPos.begin();
+
+			blockPos.insert(m, highLine - 1);
+		}
+
+		highLine--;
+	}
+
+	for (vector<int>::iterator in = blockPos.begin(); in != blockPos.end(); in++){
+		cout << *in << "\t";
+	}
+
+	/*for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++){
+		for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++){
+			cout << *inner << " ";
+		}
+		cout << endl;
+	}*/
+
+	//temp placeholder
+	return assemblyCommands;
+}
+
 
 //parser function that starts the top down recursion for grammar rules that takes in the file
 void parser(ifstream &file) {
@@ -66,6 +145,10 @@ void parser(ifstream &file) {
 
 	//calls the Program function, checking if "program" is present
 	Program(file, curToken);
+
+	//function to optimize assmeblycode
+	Optimization(assemblyCommands);
+
 
 }
 
@@ -127,7 +210,7 @@ void Program(ifstream& file, LexTok& token) {
 	assemblyCommands.push_back("syscall");
 
 	//output commands at end of programs
-	bool txt = false;
+	/*bool txt = false;
 	for (vector<string>::iterator it = assemblyCommands.begin(); it != assemblyCommands.end(); it++) {
 		if (it->compare(".text") == 0) {
 			txt = true;
@@ -147,7 +230,7 @@ void Program(ifstream& file, LexTok& token) {
 
 		}
 
-	}
+	}*/
 
 }
 
@@ -486,7 +569,7 @@ void Read(ifstream& file, LexTok& token) {
 			}
 		}
 		if (reg == true){
-			assemblyCommands.push_back("move " + regist + ",$a0");
+			assemblyCommands.push_back("move " + regist + ", $v0");
 		}
 		else{
 			cout << "error" << endl;
