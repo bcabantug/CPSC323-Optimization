@@ -90,12 +90,15 @@ vector<string> Optimization(vector<string> code) {
 	}
 
 	//output for the optCommands
-	/*for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
-		for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
-			cout << *inner << " ";
-		}
-		cout << endl;
-	}*/
+	for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
+	for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
+	cout << *inner << " ";
+	}
+	cout << endl;
+	}
+
+	cout << endl;
+
 
 	//finding the basic blocks of the code by starting at the end and moving to the top
 	//starts from the end of the commands and processes it
@@ -104,7 +107,7 @@ vector<string> Optimization(vector<string> code) {
 	blockPos.insert(m, highLine);
 	//highLine--;
 
-	for (vector<vector<string>>::iterator blocking = --optCommands.end() ; blocking != optCommands.begin(); blocking--) {
+	for (vector<vector<string>>::iterator blocking = --optCommands.end(); blocking != optCommands.begin(); blocking--) {
 		//insert from label line == branch target
 
 		//cout << (*blocking)[0] << endl;
@@ -141,9 +144,131 @@ vector<string> Optimization(vector<string> code) {
 
 
 	//starting to process each block
-	
+	for (vector<int>::iterator posIn = blockPos.begin(), end = --blockPos.end(); posIn != end; posIn++) {
+		int a, b;
 
-	
+		a = *posIn;
+		b = (*std::next(posIn,1));
+
+		for (int i = a; i < b; i++) {
+			if (optCommands[i][0].compare("li") == 0) {
+
+				
+
+				string newStr = optCommands[i][1];
+				newStr.pop_back();
+
+				if (newStr.compare("$v0") == 0) {
+					//do nothing
+				
+				}
+				else {
+					for (int k = i; k < b; k++) {
+						if (optCommands[k][0].compare("move") == 0) {
+							if (optCommands[k][2].compare(newStr) == 0) {
+
+								optCommands[i][1] = optCommands[k][1];
+
+								optCommands[k][0] = "deleted";
+								break;
+							}
+
+						}
+					}
+				}
+				
+			}
+			else if (optCommands[i][0].compare("add") == 0) {
+				string newStr = optCommands[i][1];
+				newStr.pop_back();
+
+				for (int k = i; k < b; k++) {
+					if (optCommands[k][0].compare("move") == 0) {
+						if (optCommands[k][2].compare(newStr) == 0) {
+
+							optCommands[i][1] = optCommands[k][1];
+
+							optCommands[k][0] = "deleted";
+							break;
+						}
+
+					}
+				}
+				
+			
+			}
+			else if (optCommands[i][0].compare("sub") == 0) {
+
+				string newStr = optCommands[i][1];
+				newStr.pop_back();
+
+				for (int k = i; k < b; k++) {
+					if (optCommands[k][0].compare("move") == 0) {
+						if (optCommands[k][2].compare(newStr) == 0) {
+
+							optCommands[i][1] = optCommands[k][1];
+
+							optCommands[k][0] = "deleted";
+							break;
+						}
+
+					}
+				}
+				
+			}
+			else if (optCommands[i][0].compare("mflo") == 0) {
+				
+				string newStr = optCommands[i][1];
+				/*newStr.pop_back();*/
+
+				for (int k = i; k < b; k++) {
+					if (optCommands[k][0].compare("move") == 0) {
+						if (optCommands[k][2].compare(newStr) == 0) {
+
+							optCommands[i][1] = optCommands[k][1];
+
+							optCommands[k][0] = "deleted";
+							break;
+						}
+
+					}
+				}
+
+
+			}
+			else if (optCommands[i][0].compare("move") == 0) {
+
+				string newStr = optCommands[i][1];
+				newStr.pop_back();
+
+				for (int k = i; k < b; k++) {
+					if (optCommands[k][0].compare("move") == 0) {
+						if (optCommands[k][2].compare(newStr) == 0) {
+
+							optCommands[i][1] = optCommands[k][1];
+
+							optCommands[k][0] = "deleted";
+							break;
+						}
+
+					}
+				}
+			}
+			else {
+			
+			}
+		}
+
+
+	}
+
+
+	for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
+	for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
+	cout << *inner << " ";
+	}
+	cout << endl;
+	}
 
 	//temp placeholder
 	return assemblyCommands;
@@ -608,9 +733,24 @@ void Write(ifstream& file, LexTok& token) {
 	assemblyCommands.push_back("move $a0, " + exprList[i]);
 	assemblyCommands.push_back("syscall");
 
-	//clear register used
-	int regNum = exprList[i][2] - '0';
-	tRegister[regNum] = "";
+	//clear register used if not variabls
+
+	//check if variable is declared
+	//bool err = false;
+	//iterates to check if the variable was declared before being used
+	//for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
+	//	if (token.lexeme.compare(*it) != 0) { //if it is not found, then return that error is true
+	//		err = true;
+	//	}
+	//	else { //otherwise, return false for error and break out
+	//		err = false;
+	//		break;
+	//	}
+	//}
+	//if (err == true) {
+		int regNum = exprList[i][2] - '0';
+		tRegister[regNum] = "";
+	/*}*/
 
 	while (token.lexeme.compare(",") == 0) {
 		//consumes comma token
@@ -621,10 +761,27 @@ void Write(ifstream& file, LexTok& token) {
 		assemblyCommands.push_back("li $v0, 1");
 		assemblyCommands.push_back("move $a0, " + exprList[i]);
 		assemblyCommands.push_back("syscall");
-		//clear register used
-		int regNum = exprList[i][2] - '0';
-		tRegister[regNum] = "";
+		
+		//clear register used if not a variable
+		
+		//check if variable is declared
+		//bool err = false;
+		////iterates to check if the variable was declared before being used
+		//for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
+		//	if (token.lexeme.compare(*it) != 0) { //if it is not found, then return that error is true
+		//		err = true;
+		//	}
+		//	else { //otherwise, return false for error and break out
+		//		err = false;
+		//		break;
+		//	}
+		//}
+		//if (err == true) {
+			int regNum = exprList[i][2] - '0';
+			tRegister[regNum] = "";
+		/*}*/
 	}
+	exprList;
 
 	expect(")", token, file);
 
