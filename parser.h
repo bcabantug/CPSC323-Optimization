@@ -22,13 +22,14 @@ Tested using both IDE and command line
 vector <string> assemblyCommands;
 //array that represents the temp registers
 string tRegister[10] = {};
-//vector that holds the declared variables 
+//vector that holds the declared variables
 vector<string> list;
-//vector that 
+//vector that
 //vector <string> ifOrder;
 //vector/stack that holds the locations of the elsifs/else for the branch conds
 vector<int> location;
-
+//vector that holds all initialized variables
+vector<string> initialize;
 
 //vector of vector<string> that holds the commands for optimization
 vector<vector<string>> optCommands;
@@ -58,16 +59,16 @@ void If(ifstream&, LexTok&); //
 void While(ifstream&, LexTok&); //
 
 string Cond(ifstream&, LexTok&); //
-string RelOp(ifstream&, LexTok&); // 
+string RelOp(ifstream&, LexTok&); //
 string Expr(ifstream&, LexTok&); //
 string Term(ifstream&, LexTok&); //
 string Factor(ifstream&, LexTok&); //
 
-								   //function to optimize assmeblyCommands prototype
-vector<string> Optimization(vector<string>);
+//function to optimize assmeblyCommands prototype
+vector<vector<string>> Optimization(vector<string>);
 
 //takes old assemblyCommands and processes them to optimize moves...
-vector<string> Optimization(vector<string> code) {
+vector<vector<string>> Optimization(vector<string> code) {
 	//processing code to vector vector of strings
 	string currentString, tmpStr;
 
@@ -90,14 +91,14 @@ vector<string> Optimization(vector<string> code) {
 	}
 
 	//output for the optCommands
-	for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
-	for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
-	cout << *inner << " ";
-	}
-	cout << endl;
+	/*for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
+		for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
+			cout << *inner << " ";
+		}
+		cout << endl;
 	}
 
-	cout << endl;
+	cout << endl;*/
 
 
 	//finding the basic blocks of the code by starting at the end and moving to the top
@@ -114,7 +115,7 @@ vector<string> Optimization(vector<string> code) {
 
 		//cout << ((*blocking)[0]).back() << endl;
 
-		//once it reaches the top of the file/before the declarations 
+		//once it reaches the top of the file/before the declarations
 		if ((*blocking)[0].compare(".text") == 0) {
 			break; //break out of the loop
 		}
@@ -138,7 +139,7 @@ vector<string> Optimization(vector<string> code) {
 	blockPos.insert(m, 0);
 
 	//for (vector<int>::iterator in = blockPos.begin(); in != blockPos.end(); in++) {
-	//	cout << *in << "\t";
+	//    cout << *in << "\t";
 	//}
 	//cout << endl;
 
@@ -148,22 +149,30 @@ vector<string> Optimization(vector<string> code) {
 		int a, b;
 
 		a = *posIn;
-		b = (*std::next(posIn,1));
+		b = (*std::next(posIn, 1));
 
 		for (int i = a; i < b; i++) {
 			if (optCommands[i][0].compare("li") == 0) {
 
-				
+
 
 				string newStr = optCommands[i][1];
 				newStr.pop_back();
 
 				if (newStr.compare("$v0") == 0) {
 					//do nothing
-				
+
 				}
 				else {
-					for (int k = i; k < b; k++) {
+					if (optCommands[i + 1][0].compare("move") == 0) {
+						if (optCommands[i + 1][2].compare(newStr) == 0) {
+
+							optCommands[i][1] = optCommands[i + 1][1];
+
+							optCommands[i + 1][0] = "deleted";
+						}
+					}
+					/*for (int k = i; k < b; k++) {
 						if (optCommands[k][0].compare("move") == 0) {
 							if (optCommands[k][2].compare(newStr) == 0) {
 
@@ -174,15 +183,24 @@ vector<string> Optimization(vector<string> code) {
 							}
 
 						}
-					}
+					}*/
 				}
-				
+
 			}
 			else if (optCommands[i][0].compare("add") == 0) {
 				string newStr = optCommands[i][1];
 				newStr.pop_back();
 
-				for (int k = i; k < b; k++) {
+				if (optCommands[i + 1][0].compare("move") == 0) {
+					if (optCommands[i + 1][2].compare(newStr) == 0) {
+
+						optCommands[i][1] = optCommands[i + 1][1];
+
+						optCommands[i + 1][0] = "deleted";
+					}
+				}
+
+				/*for (int k = i; k < b; k++) {
 					if (optCommands[k][0].compare("move") == 0) {
 						if (optCommands[k][2].compare(newStr) == 0) {
 
@@ -193,16 +211,25 @@ vector<string> Optimization(vector<string> code) {
 						}
 
 					}
-				}
-				
-			
+				}*/
+
+
 			}
 			else if (optCommands[i][0].compare("sub") == 0) {
 
 				string newStr = optCommands[i][1];
 				newStr.pop_back();
 
-				for (int k = i; k < b; k++) {
+				if (optCommands[i + 1][0].compare("move") == 0) {
+					if (optCommands[i + 1][2].compare(newStr) == 0) {
+
+						optCommands[i][1] = optCommands[i + 1][1];
+
+						optCommands[i + 1][0] = "deleted";
+					}
+				}
+
+				/*for (int k = i; k < b; k++) {
 					if (optCommands[k][0].compare("move") == 0) {
 						if (optCommands[k][2].compare(newStr) == 0) {
 
@@ -213,15 +240,24 @@ vector<string> Optimization(vector<string> code) {
 						}
 
 					}
-				}
-				
+				}*/
+
 			}
 			else if (optCommands[i][0].compare("mflo") == 0) {
-				
+
 				string newStr = optCommands[i][1];
 				/*newStr.pop_back();*/
 
-				for (int k = i; k < b; k++) {
+				if (optCommands[i + 1][0].compare("move") == 0) {
+					if (optCommands[i + 1][2].compare(newStr) == 0) {
+
+						optCommands[i][1] = optCommands[i + 1][1];
+
+						optCommands[i + 1][0] = "deleted";
+					}
+				}
+
+				/*for (int k = i; k < b; k++) {
 					if (optCommands[k][0].compare("move") == 0) {
 						if (optCommands[k][2].compare(newStr) == 0) {
 
@@ -232,7 +268,7 @@ vector<string> Optimization(vector<string> code) {
 						}
 
 					}
-				}
+				}*/
 
 
 			}
@@ -241,7 +277,16 @@ vector<string> Optimization(vector<string> code) {
 				string newStr = optCommands[i][1];
 				newStr.pop_back();
 
-				for (int k = i; k < b; k++) {
+				if (optCommands[i + 1][0].compare("move") == 0) {
+					if (optCommands[i + 1][2].compare(newStr) == 0) {
+
+						optCommands[i][1] = optCommands[i + 1][1];
+
+						optCommands[i + 1][0] = "deleted";
+					}
+				}
+
+				/*for (int k = i; k < b; k++) {
 					if (optCommands[k][0].compare("move") == 0) {
 						if (optCommands[k][2].compare(newStr) == 0) {
 
@@ -252,10 +297,10 @@ vector<string> Optimization(vector<string> code) {
 						}
 
 					}
-				}
+				}*/
 			}
 			else {
-			
+
 			}
 		}
 
@@ -263,15 +308,15 @@ vector<string> Optimization(vector<string> code) {
 	}
 
 
-	for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
-	for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
-	cout << *inner << " ";
-	}
-	cout << endl;
-	}
+	/*for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
+		for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
+			cout << *inner << " ";
+		}
+		cout << endl;
+	}*/
 
 	//temp placeholder
-	return assemblyCommands;
+	return optCommands;
 }
 
 
@@ -284,9 +329,19 @@ void parser(ifstream &file) {
 	Program(file, curToken);
 
 	//function to optimize assmeblycode
-	Optimization(assemblyCommands);
+	vector<vector<string>> final = Optimization(assemblyCommands);
 
-
+	for (vector<vector<string>>::iterator min = final.begin(); min != final.end(); min++) {
+		if ((*min)[0].compare("deleted") == 0){
+			//do nothing
+		}
+		else{
+			for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
+				cout << *inner << " ";
+			}
+			cout << endl;
+		}
+	}
 }
 
 //Display the error message
@@ -326,7 +381,7 @@ void Program(ifstream& file, LexTok& token) {
 
 	//Consume token if present
 	expect("begin", token, file);
-	//begins the main assembly commands 
+	//begins the main assembly commands
 	assemblyCommands.push_back(".text");
 	assemblyCommands.push_back("main:");
 
@@ -345,6 +400,25 @@ void Program(ifstream& file, LexTok& token) {
 	//the assembly commands to end the program are added at the end
 	assemblyCommands.push_back("li $v0, 10");
 	assemblyCommands.push_back("syscall");
+
+	//Test to see what is in inililize vector
+	//    bool txt = false;
+	//    for (vector<string>::iterator it = initialize.begin(); it != initialize.end(); it++) {
+	//        if (it->compare(".text") == 0) {
+	//            txt = true;
+	//        }
+	//        if (txt == false) {
+	//            cout << *it << endl;
+	//        }
+	//        else {
+	//            if (it->back() != ':' && it->compare(".text") != 0) {
+	//                cout << "\t" << *it << endl;
+	//            }
+	//            else {
+	//                cout << *it << endl;
+	//            }
+	//        }
+	//    }
 
 	//output commands at end of programs
 	/*bool txt = false;
@@ -380,7 +454,7 @@ void DeclList(ifstream& file, LexTok& token) {
 		declL = Decl(file, token);
 
 
-		//loop to go through the vector 
+		//loop to go through the vector
 		for (vector<string>::iterator it = declL.begin(); it != declL.end(); it++) {
 
 			//adds them to the main assembly Command vector
@@ -479,7 +553,7 @@ string Type(ifstream& file, LexTok& token) {
 	if (token.lexeme.compare("int") == 0)
 	{
 		//word is only type available so it is automatically set
-		t = ".word	";
+		t = ".word    ";
 
 		//consume the token first
 		token = lexer(file);
@@ -517,7 +591,7 @@ vector<string> VarList(ifstream& file, LexTok& token) {
 		}
 	}//loop again if there is a comma following the identifier
 
-	 //return the vector
+	//return the vector
 	return ident;
 }
 
@@ -538,7 +612,7 @@ void StmtList(ifstream& file, LexTok& token) {
 void Stmt(ifstream& file, LexTok& token) {
 	//if token is identifier
 	if (token.token.compare("Identifier") == 0)
-	{	//calls Assign function and output rule
+	{    //calls Assign function and output rule
 
 		//checks if identifier was declared
 		//bool for checking set to false
@@ -561,7 +635,7 @@ void Stmt(ifstream& file, LexTok& token) {
 	}
 	//if token is read
 	else if (token.lexeme.compare("read") == 0)
-	{	//calls Read function and output rule
+	{    //calls Read function and output rule
 		Read(file, token);
 	}
 	//if token is write
@@ -572,28 +646,29 @@ void Stmt(ifstream& file, LexTok& token) {
 	}
 	//if token is if
 	else if (token.lexeme.compare("if") == 0)
-	{	//calls If function and output rule
+	{    //calls If function and output rule
 		//saves the count of if that is called
 		ifCount++;
 		If(file, token);
 	}
 	//if token is while
 	else if (token.lexeme.compare("while") == 0)
-	{	//calls While function and output rule
+	{    //calls While function and output rule
 		While(file, token);
 	}
 }
 
 //Grace
 void Assign(ifstream& file, LexTok& token) {
-	//assign vector that holds the 
+	//assign vector that holds the
 	//vector<string> assign;
 
 	//variables to set the identifier and register to push to the assembly commands
 	string ident = "";
 	string reg = "";
 
-
+	//Add all the variables that were initialized to vector
+	initialize.push_back(token.lexeme);
 
 	//if token is Identifier, consume token
 	if (token.token.compare("Identifier") == 0)
@@ -636,7 +711,7 @@ void Assign(ifstream& file, LexTok& token) {
 	for (int i = 0; i < 10; i++) {
 		//boolean to check if register used in conditional is part of the declared list
 		bool declared = false;
-		//iterates throuhg the list of declared variables to see if it keeps 
+		//iterates throuhg the list of declared variables to see if it keeps
 		for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
 			if ((*it).compare(tRegister[i]) == 0) {
 				declared = true; //if found bool is true and breaks
@@ -649,6 +724,7 @@ void Assign(ifstream& file, LexTok& token) {
 		}
 
 	}
+
 }
 
 //BRIAN
@@ -712,6 +788,7 @@ void Read(ifstream& file, LexTok& token) {
 	expect(")", token, file);
 
 	expect(";", token, file);
+
 }
 
 //Brian
@@ -721,10 +798,40 @@ void Write(ifstream& file, LexTok& token) {
 	//counter that counts how many expressions there are evertyome one is push to exprList
 	int i = 0;
 
+	string errorVar = "";
+
 	//after consuming write lexeme
 	expect("write", token, file);
 
 	expect("(", token, file);
+
+	//Check for all identifiers
+	if (token.token.compare("Identifier") == 0)
+	{
+		//If initialize is empty, the ident is not initialized
+		if (initialize.empty())
+		{
+			cout << "error: using variable '" << token.lexeme << "' before initializing" << endl;
+		}
+
+		//Check the initialized list
+		bool test = false;
+		for (vector<string>::iterator init = initialize.begin(); init != initialize.end(); init++) {
+			if (token.lexeme.compare(*init) != 0) { //if not found, the var not initialized is saved
+				test = true;
+				errorVar = token.lexeme;
+			}
+			else { //otherwise, then it is false and breaks out of the iterator
+				test = false;
+				break;
+			}
+		}
+		//if the error is found, the output
+		if (test == true) {
+			cout << "error: using variable '" << errorVar << "' before initializing" << endl;
+		}
+
+	}
 
 	//keeps on finding an expression as long as the token matches with the comma
 	exprList.push_back(Expr(file, token));
@@ -736,21 +843,21 @@ void Write(ifstream& file, LexTok& token) {
 	//clear register used if not variabls
 
 	//check if variable is declared
-	//bool err = false;
-	//iterates to check if the variable was declared before being used
-	//for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
-	//	if (token.lexeme.compare(*it) != 0) { //if it is not found, then return that error is true
-	//		err = true;
-	//	}
-	//	else { //otherwise, return false for error and break out
-	//		err = false;
-	//		break;
-	//	}
+	//    bool err = false;
+	//    //iterates to check if the variable was declared before being used
+	//    for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
+	//        if (token.lexeme.compare(*it) != 0) { //if it is not found, then return that error is true
+	//            err = true;
+	//        }
+	//        else { //otherwise, return false for error and break out
+	//            err = false;
+	//            break;
+	//        }
+	//    }
+	//    if (err == true) {
+	/*int regNum = exprList[i][2] - '0';
+	tRegister[regNum] = "";*/
 	//}
-	//if (err == true) {
-		int regNum = exprList[i][2] - '0';
-		tRegister[regNum] = "";
-	/*}*/
 
 	while (token.lexeme.compare(",") == 0) {
 		//consumes comma token
@@ -761,24 +868,24 @@ void Write(ifstream& file, LexTok& token) {
 		assemblyCommands.push_back("li $v0, 1");
 		assemblyCommands.push_back("move $a0, " + exprList[i]);
 		assemblyCommands.push_back("syscall");
-		
+
 		//clear register used if not a variable
-		
+
 		//check if variable is declared
 		//bool err = false;
 		////iterates to check if the variable was declared before being used
 		//for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
-		//	if (token.lexeme.compare(*it) != 0) { //if it is not found, then return that error is true
-		//		err = true;
-		//	}
-		//	else { //otherwise, return false for error and break out
-		//		err = false;
-		//		break;
-		//	}
+		//    if (token.lexeme.compare(*it) != 0) { //if it is not found, then return that error is true
+		//        err = true;
+		//    }
+		//    else { //otherwise, return false for error and break out
+		//        err = false;
+		//        break;
+		//    }
 		//}
 		//if (err == true) {
-			int regNum = exprList[i][2] - '0';
-			tRegister[regNum] = "";
+		int regNum = exprList[i][2] - '0';
+		tRegister[regNum] = "";
 		/*}*/
 	}
 	exprList;
@@ -789,7 +896,7 @@ void Write(ifstream& file, LexTok& token) {
 
 }
 
-//BRIAN 
+//BRIAN
 void If(ifstream& file, LexTok& token) {
 	//string to hold the conditional
 	string cond = "";
@@ -822,7 +929,7 @@ void If(ifstream& file, LexTok& token) {
 
 	expect("end", token, file);
 
-	//if there is an elsif/else present after the if, add a branch to the end of said If 
+	//if there is an elsif/else present after the if, add a branch to the end of said If
 	if (token.lexeme.compare("elsif") == 0 || token.lexeme.compare("else") == 0) {
 		assemblyCommands.push_back("b endIf" + to_string(countOfIf));
 	}
@@ -830,7 +937,25 @@ void If(ifstream& file, LexTok& token) {
 	//elseif statements if there are any
 	if (token.lexeme.compare("elsif") == 0) {
 
+		
+
 		do {
+			////clears registers that are not part of the variables
+			for (int i = 0; i < 10; i++) {
+				//boolean to check if register used in conditional is part of the declared list
+				bool declared = false;
+				//iterates throuhg the list of declared variables to see if it keeps
+				for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
+					if ((*it).compare(tRegister[i]) == 0) {
+						declared = true; //if found bool is true and breaks
+						break;
+					}
+				} //if not in the declared list, clears the register instead
+				if (declared == false) {
+					tRegister[i] = "";
+				}
+			}
+
 			elsifCount++;
 			//consume initial elsif
 			expect("elsif", token, file);
@@ -853,6 +978,7 @@ void If(ifstream& file, LexTok& token) {
 			location.push_back(assemblyCommands.size() - 1);
 
 			expect("begin", token, file);
+
 			//call StmtList function
 			StmtList(file, token);
 
@@ -879,6 +1005,25 @@ void If(ifstream& file, LexTok& token) {
 		location.pop_back();
 
 		expect("begin", token, file);
+
+		//clears registers that are not part of the variables
+
+		for (int i = 0; i < 10; i++) {
+			//boolean to check if register used in conditional is part of the declared list
+			bool declared = false;
+			//iterates throuhg the list of declared variables to see if it keeps
+			for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
+				if ((*it).compare(tRegister[i]) == 0) {
+					declared = true; //if found bool is true and breaks
+					break;
+				}
+			} //if not in the declared list, clears the register instead
+			if (declared == false) {
+				tRegister[i] = "";
+			}
+		}
+
+
 		//call StmtList
 		StmtList(file, token);
 		expect("end", token, file);
@@ -916,7 +1061,7 @@ void While(ifstream& file, LexTok& token) {
 	}
 
 	expect("(", token, file);
-	//calls Cond function, saves statement
+
 	cond = Cond(file, token);
 	//adds the endWhile jump to the condition statement
 	cond = cond + endWhil;
@@ -928,10 +1073,43 @@ void While(ifstream& file, LexTok& token) {
 
 	expect("begin", token, file);
 
+	////clears registers that are not part of the variables
+	for (int i = 0; i < 10; i++) {
+		//boolean to check if register used in conditional is part of the declared list
+		bool declared = false;
+		//iterates throuhg the list of declared variables to see if it keeps
+		for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
+			if ((*it).compare(tRegister[i]) == 0) {
+				declared = true; //if found bool is true and breaks
+				break;
+			}
+		} //if not in the declared list, clears the register instead
+		if (declared == false) {
+			tRegister[i] = "";
+		}
+	}
+
 	//checks for stmtList if there
 	if (token.token.compare("Identifier") == 0 || token.lexeme.compare("read") == 0 || token.lexeme.compare("write") == 0 || token.lexeme.compare("if") == 0 || token.lexeme.compare("while") == 0) {
 		//call StmtList function
 		StmtList(file, token);
+	}
+
+	//calls Cond function, saves statement
+	////clears registers that are not part of the variables
+	for (int i = 0; i < 10; i++) {
+		//boolean to check if register used in conditional is part of the declared list
+		bool declared = false;
+		//iterates throuhg the list of declared variables to see if it keeps
+		for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
+			if ((*it).compare(tRegister[i]) == 0) {
+				declared = true; //if found bool is true and breaks
+				break;
+			}
+		} //if not in the declared list, clears the register instead
+		if (declared == false) {
+			tRegister[i] = "";
+		}
 	}
 
 	expect("end", token, file);
@@ -967,7 +1145,7 @@ string Cond(ifstream& file, LexTok& token) {
 
 	//boolean to check if register used in conditional is part of the declared list
 	bool declared = false;
-	//iterates throuhg the list of declared variables to see if it keeps 
+	//iterates throuhg the list of declared variables to see if it keeps
 	for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
 		if ((*it).compare(tRegister[r1[2] - '0']) == 0) {
 			declared = true; //if found bool is true and breaks
@@ -1159,6 +1337,39 @@ string Term(ifstream& file, LexTok& token) {
 			/*int mo = r2[2] - '0';
 			tRegister[mo] = "";*/
 
+
+			////clear either register that is not a variable
+			//bool notVar1 = true;
+			//for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
+			//	if ((*it).compare(tRegister[r1[2] - '0']) == 0) {
+			//		notVar1 = true;
+			//		break;
+			//	}
+			//	else {
+			//		notVar1 = false;
+			//	}
+			//}
+			//if (notVar1 == false){
+			//	int mo = r1[2] - '0';
+			//	tRegister[mo] = ""; 
+			//}
+
+			bool notVar2 = true;
+			for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
+				if ((*it).compare(tRegister[r2[2] - '0']) == 0) {
+					notVar2 = true;
+					break;
+				}
+				else {
+					notVar2 = false;
+				}
+			}
+			if (notVar2 == false){
+				int mo = r2[2] - '0';
+				tRegister[mo] = "";
+			}
+
+			//tRegister;
 			//returns the register the value was stored
 			return r3;
 		}
@@ -1189,7 +1400,7 @@ string Term(ifstream& file, LexTok& token) {
 
 			//boolean to check if register used in conditional is part of the declared list
 			bool check = false;
-			//iterates throuhg the list of declared variables to see if it keeps 
+			//iterates throuhg the list of declared variables to see if it keeps
 			for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
 				if ((*it).compare(tRegister[r1[2] - '0']) == 0 || (*it).compare(tRegister[r2[2] - '0']) == 0) {
 					check = true;
@@ -1228,6 +1439,8 @@ string Factor(ifstream& file, LexTok& token) {
 	string reg = "$t";
 	string in = "";
 
+	string errorVar = "";
+
 	//Check if identifier, , realConst, strConst
 	if (token.token.compare("Identifier") == 0)
 	{
@@ -1247,6 +1460,23 @@ string Factor(ifstream& file, LexTok& token) {
 		}
 		if (err == true) { //if not found in declared list, then the error is output
 			cout << "error: using " << token.lexeme << " without declaring first" << endl;
+		}
+
+		//Check the initialized list
+		bool test = false;
+		for (vector<string>::iterator init = initialize.begin(); init != initialize.end(); init++) {
+			if (token.lexeme.compare(*init) != 0) { //if not found, the var not initialized is saved
+				test = true;
+				errorVar = token.lexeme;
+			}
+			else { //otherwise, then it is false and breaks out of the iterator
+				test = false;
+				break;
+			}
+		}
+		//if the error is found, the output
+		if (test == true) {
+			cout << "error: using variable '" << errorVar << "' before initializing" << endl;
 		}
 
 
@@ -1311,3 +1541,4 @@ string Factor(ifstream& file, LexTok& token) {
 }
 
 #endif
+
