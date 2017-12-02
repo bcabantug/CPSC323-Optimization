@@ -64,7 +64,7 @@ string Expr(ifstream&, LexTok&); //
 string Term(ifstream&, LexTok&); //
 string Factor(ifstream&, LexTok&); //
 
-//function to optimize assmeblyCommands prototype
+								   //function to optimize assmeblyCommands prototype
 vector<vector<string>> Optimization(vector<string>);
 
 //takes old assemblyCommands and processes them to optimize moves...
@@ -92,12 +92,11 @@ vector<vector<string>> Optimization(vector<string> code) {
 
 	//output for the optCommands
 	/*for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
-		for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
-			cout << *inner << " ";
-		}
-		cout << endl;
+	for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
+	cout << *inner << " ";
 	}
-
+	cout << endl;
+	}
 	cout << endl;*/
 
 
@@ -173,16 +172,13 @@ vector<vector<string>> Optimization(vector<string> code) {
 						}
 					}
 					/*for (int k = i; k < b; k++) {
-						if (optCommands[k][0].compare("move") == 0) {
-							if (optCommands[k][2].compare(newStr) == 0) {
-
-								optCommands[i][1] = optCommands[k][1];
-
-								optCommands[k][0] = "deleted";
-								break;
-							}
-
-						}
+					if (optCommands[k][0].compare("move") == 0) {
+					if (optCommands[k][2].compare(newStr) == 0) {
+					optCommands[i][1] = optCommands[k][1];
+					optCommands[k][0] = "deleted";
+					break;
+					}
+					}
 					}*/
 				}
 
@@ -201,16 +197,13 @@ vector<vector<string>> Optimization(vector<string> code) {
 				}
 
 				/*for (int k = i; k < b; k++) {
-					if (optCommands[k][0].compare("move") == 0) {
-						if (optCommands[k][2].compare(newStr) == 0) {
-
-							optCommands[i][1] = optCommands[k][1];
-
-							optCommands[k][0] = "deleted";
-							break;
-						}
-
-					}
+				if (optCommands[k][0].compare("move") == 0) {
+				if (optCommands[k][2].compare(newStr) == 0) {
+				optCommands[i][1] = optCommands[k][1];
+				optCommands[k][0] = "deleted";
+				break;
+				}
+				}
 				}*/
 
 
@@ -230,16 +223,13 @@ vector<vector<string>> Optimization(vector<string> code) {
 				}
 
 				/*for (int k = i; k < b; k++) {
-					if (optCommands[k][0].compare("move") == 0) {
-						if (optCommands[k][2].compare(newStr) == 0) {
-
-							optCommands[i][1] = optCommands[k][1];
-
-							optCommands[k][0] = "deleted";
-							break;
-						}
-
-					}
+				if (optCommands[k][0].compare("move") == 0) {
+				if (optCommands[k][2].compare(newStr) == 0) {
+				optCommands[i][1] = optCommands[k][1];
+				optCommands[k][0] = "deleted";
+				break;
+				}
+				}
 				}*/
 
 			}
@@ -258,16 +248,13 @@ vector<vector<string>> Optimization(vector<string> code) {
 				}
 
 				/*for (int k = i; k < b; k++) {
-					if (optCommands[k][0].compare("move") == 0) {
-						if (optCommands[k][2].compare(newStr) == 0) {
-
-							optCommands[i][1] = optCommands[k][1];
-
-							optCommands[k][0] = "deleted";
-							break;
-						}
-
-					}
+				if (optCommands[k][0].compare("move") == 0) {
+				if (optCommands[k][2].compare(newStr) == 0) {
+				optCommands[i][1] = optCommands[k][1];
+				optCommands[k][0] = "deleted";
+				break;
+				}
+				}
 				}*/
 
 
@@ -287,16 +274,13 @@ vector<vector<string>> Optimization(vector<string> code) {
 				}
 
 				/*for (int k = i; k < b; k++) {
-					if (optCommands[k][0].compare("move") == 0) {
-						if (optCommands[k][2].compare(newStr) == 0) {
-
-							optCommands[i][1] = optCommands[k][1];
-
-							optCommands[k][0] = "deleted";
-							break;
-						}
-
-					}
+				if (optCommands[k][0].compare("move") == 0) {
+				if (optCommands[k][2].compare(newStr) == 0) {
+				optCommands[i][1] = optCommands[k][1];
+				optCommands[k][0] = "deleted";
+				break;
+				}
+				}
 				}*/
 			}
 			else {
@@ -309,13 +293,13 @@ vector<vector<string>> Optimization(vector<string> code) {
 
 
 	/*for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
-		for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
-			cout << *inner << " ";
-		}
-		cout << endl;
+	for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
+	cout << *inner << " ";
+	}
+	cout << endl;
 	}*/
 
-	//temp placeholder
+	//output commands after optimization
 	return optCommands;
 }
 
@@ -332,10 +316,14 @@ void parser(ifstream &file) {
 	vector<vector<string>> final = Optimization(assemblyCommands);
 
 	for (vector<vector<string>>::iterator min = final.begin(); min != final.end(); min++) {
-		if ((*min)[0].compare("deleted") == 0){
+		if ((*min)[0].compare("deleted") == 0) {
 			//do nothing
 		}
-		else{
+		else {
+			if ((*min)[0].back() != ':') {
+				cout << "\t";
+			}
+
 			for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
 				cout << *inner << " ";
 			}
@@ -400,44 +388,6 @@ void Program(ifstream& file, LexTok& token) {
 	//the assembly commands to end the program are added at the end
 	assemblyCommands.push_back("li $v0, 10");
 	assemblyCommands.push_back("syscall");
-
-	//Test to see what is in inililize vector
-	//    bool txt = false;
-	//    for (vector<string>::iterator it = initialize.begin(); it != initialize.end(); it++) {
-	//        if (it->compare(".text") == 0) {
-	//            txt = true;
-	//        }
-	//        if (txt == false) {
-	//            cout << *it << endl;
-	//        }
-	//        else {
-	//            if (it->back() != ':' && it->compare(".text") != 0) {
-	//                cout << "\t" << *it << endl;
-	//            }
-	//            else {
-	//                cout << *it << endl;
-	//            }
-	//        }
-	//    }
-
-	//output commands at end of programs
-	/*bool txt = false;
-	for (vector<string>::iterator it = assemblyCommands.begin(); it != assemblyCommands.end(); it++) {
-	if (it->compare(".text") == 0) {
-	txt = true;
-	}
-	if (txt == false) {
-	cout << *it << endl;
-	}
-	else {
-	if (it->back() != ':' && it->compare(".text") != 0) {
-	cout << "\t" << *it << endl;
-	}
-	else {
-	cout << *it << endl;
-	}
-	}
-	}*/
 
 }
 
@@ -591,7 +541,7 @@ vector<string> VarList(ifstream& file, LexTok& token) {
 		}
 	}//loop again if there is a comma following the identifier
 
-	//return the vector
+	 //return the vector
 	return ident;
 }
 
@@ -614,8 +564,8 @@ void Stmt(ifstream& file, LexTok& token) {
 	if (token.token.compare("Identifier") == 0)
 	{    //calls Assign function and output rule
 
-		//checks if identifier was declared
-		//bool for checking set to false
+		 //checks if identifier was declared
+		 //bool for checking set to false
 		bool err = false;
 		//iterator to check through list
 		for (vector<string>::iterator it = list.begin(); it != list.end(); it++) {
@@ -647,7 +597,7 @@ void Stmt(ifstream& file, LexTok& token) {
 	//if token is if
 	else if (token.lexeme.compare("if") == 0)
 	{    //calls If function and output rule
-		//saves the count of if that is called
+		 //saves the count of if that is called
 		ifCount++;
 		If(file, token);
 	}
@@ -937,7 +887,7 @@ void If(ifstream& file, LexTok& token) {
 	//elseif statements if there are any
 	if (token.lexeme.compare("elsif") == 0) {
 
-		
+
 
 		do {
 			////clears registers that are not part of the variables
@@ -1364,7 +1314,7 @@ string Term(ifstream& file, LexTok& token) {
 					notVar2 = false;
 				}
 			}
-			if (notVar2 == false){
+			if (notVar2 == false) {
 				int mo = r2[2] - '0';
 				tRegister[mo] = "";
 			}
@@ -1541,4 +1491,3 @@ string Factor(ifstream& file, LexTok& token) {
 }
 
 #endif
-
