@@ -1,0 +1,9 @@
+CPSC 323-85
+Project 4 Work Contribution
+Dec 1, 2017
+
+Brian Cabantug
+Worked on the project with Grace in person. Both worked on the program together. We both talked through the logic of the program and each basic block would be found and processed to optimize moves. Also, helped each other in checking the output
+
+
+Grace Derderian
