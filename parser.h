@@ -137,32 +137,29 @@ vector<vector<string>> Optimization(vector<string> code) {
 	m = blockPos.begin();
 	blockPos.insert(m, 0);
 
-	//for (vector<int>::iterator in = blockPos.begin(); in != blockPos.end(); in++) {
-	//    cout << *in << "\t";
-	//}
-	//cout << endl;
-
 
 	//starting to process each block
 	for (vector<int>::iterator posIn = blockPos.begin(), end = --blockPos.end(); posIn != end; posIn++) {
-		int a, b;
+		int a, b; //variables to hold the beginning and the ending of the basic block
 
+		//gets the positions
 		a = *posIn;
 		b = (*std::next(posIn, 1));
 
+		//iterates through each line in the block
 		for (int i = a; i < b; i++) {
+			//if a li command is found
 			if (optCommands[i][0].compare("li") == 0) {
 
-
-
 				string newStr = optCommands[i][1];
-				newStr.pop_back();
+				newStr.pop_back(); //removes the comma
 
 				if (newStr.compare("$v0") == 0) {
 					//do nothing
 
 				}
 				else {
+					//finds move next to it and does optimization
 					if (optCommands[i + 1][0].compare("move") == 0) {
 						if (optCommands[i + 1][2].compare(newStr) == 0) {
 
@@ -183,10 +180,11 @@ vector<vector<string>> Optimization(vector<string> code) {
 				}
 
 			}
+			//if add
 			else if (optCommands[i][0].compare("add") == 0) {
 				string newStr = optCommands[i][1];
 				newStr.pop_back();
-
+				//finds the next move and does replacement
 				if (optCommands[i + 1][0].compare("move") == 0) {
 					if (optCommands[i + 1][2].compare(newStr) == 0) {
 
@@ -206,13 +204,12 @@ vector<vector<string>> Optimization(vector<string> code) {
 				}
 				}*/
 
-
-			}
+			}//subtract
 			else if (optCommands[i][0].compare("sub") == 0) {
 
 				string newStr = optCommands[i][1];
 				newStr.pop_back();
-
+				//finds next move and optimizes
 				if (optCommands[i + 1][0].compare("move") == 0) {
 					if (optCommands[i + 1][2].compare(newStr) == 0) {
 
@@ -221,7 +218,6 @@ vector<vector<string>> Optimization(vector<string> code) {
 						optCommands[i + 1][0] = "deleted";
 					}
 				}
-
 				/*for (int k = i; k < b; k++) {
 				if (optCommands[k][0].compare("move") == 0) {
 				if (optCommands[k][2].compare(newStr) == 0) {
@@ -232,12 +228,11 @@ vector<vector<string>> Optimization(vector<string> code) {
 				}
 				}*/
 
-			}
+			}//mflo
 			else if (optCommands[i][0].compare("mflo") == 0) {
 
 				string newStr = optCommands[i][1];
-				/*newStr.pop_back();*/
-
+				//optimize next move
 				if (optCommands[i + 1][0].compare("move") == 0) {
 					if (optCommands[i + 1][2].compare(newStr) == 0) {
 
@@ -258,7 +253,7 @@ vector<vector<string>> Optimization(vector<string> code) {
 				}*/
 
 
-			}
+			}//move optimization
 			else if (optCommands[i][0].compare("move") == 0) {
 
 				string newStr = optCommands[i][1];
@@ -284,21 +279,9 @@ vector<vector<string>> Optimization(vector<string> code) {
 				}*/
 			}
 			else {
-
 			}
 		}
-
-
 	}
-
-
-	/*for (vector<vector<string>>::iterator min = optCommands.begin(); min != optCommands.end(); min++) {
-	for (vector<string>::iterator inner = min->begin(); inner != min->end(); inner++) {
-	cout << *inner << " ";
-	}
-	cout << endl;
-	}*/
-
 	//output commands after optimization
 	return optCommands;
 }
@@ -314,7 +297,7 @@ void parser(ifstream &file) {
 
 	//function to optimize assmeblycode
 	vector<vector<string>> final = Optimization(assemblyCommands);
-
+	//outputs the final commands
 	for (vector<vector<string>>::iterator min = final.begin(); min != final.end(); min++) {
 		if ((*min)[0].compare("deleted") == 0) {
 			//do nothing
