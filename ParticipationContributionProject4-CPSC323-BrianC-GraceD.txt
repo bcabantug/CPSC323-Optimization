@@ -7,3 +7,4 @@ Worked on the project with Grace in person. Both worked on the program together.
 
 
 Grace Derderian
+Brian and I both worked in person together on the project. We would talk through the logic together and then one would write out the code with the other helping. We also both spent a lot of time debugging the code making sure we had the program functioning correctly.
